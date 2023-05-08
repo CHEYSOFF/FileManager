@@ -12,7 +12,7 @@ import java.nio.file.Paths
 import java.text.SimpleDateFormat
 
 object FileManagerImpl : FileManager {
-    override fun GetFilesByPath(path: String): List<FileData> {
+    override suspend fun GetFilesByPath(path: String): List<FileData> {
         val files = File(path).listFiles()
         val result = mutableListOf<FileData>()
         for (file in files) {

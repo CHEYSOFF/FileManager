@@ -10,6 +10,6 @@ import java.text.SimpleDateFormat
 
 
 interface FileManager {
-    fun GetFilesByPath(path: String): List<FileData>
+    suspend fun GetFilesByPath(path: String): List<FileData>
     fun getFileTypeIcon(path: String): Int
 }
