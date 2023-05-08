@@ -1,5 +1,6 @@
 package cheysoff.file.manager.presention
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cheysoff.file.manager.data.FileManagerImpl
@@ -22,6 +23,7 @@ class ViewModel : ViewModel() {
     fun GetFilesByPath(path : String) {
         viewModelScope.launch(Dispatchers.IO) {
             val fileList = FileManagerImpl.GetFilesByPath(path)
+            Log.d("filelist size", fileList.size.toString())
             _screenState.emit(State.HasAllData(fileList))
         }
     }

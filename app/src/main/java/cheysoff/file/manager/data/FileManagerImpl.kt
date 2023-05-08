@@ -1,20 +1,30 @@
 package cheysoff.file.manager.data
 
+import android.os.Environment
 import android.util.Log
 import android.webkit.MimeTypeMap
 import cheysoff.file.manager.FileService.FileManager
 import cheysoff.file.manager.FileService.data.FileData
 import cheysoff.file.manager.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 
+
 object FileManagerImpl : FileManager {
-    override suspend fun GetFilesByPath(path: String): List<FileData> {
-        val files = File(path).listFiles()
+    override suspend fun GetFilesByPath(pathPart: String): List<FileData> {
+        val path = File(
+            Environment.getExternalStorageDirectory().toString() + "/" + pathPart,
+        )
+        val files = path.listFiles { _, name -> true }
         val result = mutableListOf<FileData>()
+        if(files == null) {
+            return result
+        }
         for (file in files) {
             val filePath: Path = Paths.get(file.absolutePath)
 
@@ -26,7 +36,9 @@ object FileManagerImpl : FileManager {
 
             // Get file creation date
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val creationDate = dateFormat.format(Files.getLastModifiedTime(filePath).toMillis())
+            val creationDate = dateFormat.format(withContext(Dispatchers.IO) {
+                Files.getLastModifiedTime(filePath)
+            }.toMillis())
 
             // Get file extension
             var fileExtension = filePath.fileName.toString().substringAfterLast(".")
@@ -55,7 +67,7 @@ object FileManagerImpl : FileManager {
     override fun getFileTypeIcon(path: String): Int {
         val file = File(path)
         val ext = MimeTypeMap.getFileExtensionFromUrl(file.name)
-        Log.i("ImagesExt", "$path ----> $ext")
+//        Log.i("ImagesExt", "$path ----> $ext")
         return when (".$ext") {
             ".folder" -> R.drawable.folder
             ".png", ".jpg", ".jpeg", ".gif", ".bmp" -> R.drawable.image
