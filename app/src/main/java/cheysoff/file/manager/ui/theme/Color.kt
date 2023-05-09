@@ -14,5 +14,3 @@ val DarkBeuge = Color(0xFF8A8A54)
 val Beugelight = Color(0xFFEEEEBA)
 
 val Gray = Color(0xFF6B6B6B)
-
-//val Transparent = Color(0xFFFFFF)

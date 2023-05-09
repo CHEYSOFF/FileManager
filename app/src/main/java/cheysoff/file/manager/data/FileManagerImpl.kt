@@ -6,7 +6,9 @@ import android.webkit.MimeTypeMap
 import cheysoff.file.manager.FileService.FileManager
 import cheysoff.file.manager.FileService.data.FileData
 import cheysoff.file.manager.MainActivity
+import cheysoff.file.manager.MainActivity.Companion.db
 import cheysoff.file.manager.R
+import cheysoff.file.manager.db.DBHelper.Companion.CHANGED_COl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -15,7 +17,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.LinkedList
-import kotlin.random.Random
 
 
 object FileManagerImpl : FileManager {
@@ -81,10 +82,17 @@ object FileManagerImpl : FileManager {
                 fileExtension = ".folder"
             }
 
+            Log.d("flpth", filePath.toString())
+
+
+            val res = db.getCell(filePath.toString(), CHANGED_COl)
+            Log.d("changed", res)
+            val changed = (res != "same")
+
             val curFile = FileData(
                 name = fileName, isDirectory = isDirectory,
                 size = fileSize, creationDate = creationDate, extension = fileExtension,
-                wasChanged = Random.nextBoolean()
+                wasChanged = changed
             )
             result.add(curFile)
             Log.d(

@@ -52,6 +52,8 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
 import cheysoff.file.manager.FileService.data.FileData
 import cheysoff.file.manager.data.FileManagerImpl
+import cheysoff.file.manager.db.DBHelper
+import cheysoff.file.manager.db.DBManager
 import cheysoff.file.manager.presention.State
 import cheysoff.file.manager.presention.ViewModel
 import cheysoff.file.manager.ui.theme.Beuge
@@ -76,7 +78,14 @@ class MainActivity : ComponentActivity() {
             requestPermission()
         }
 
+        db = DBHelper(this, null)
+        dbManager = DBManager()
+
+
         viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                dbManager.updateDB(environmentDirectory)
+            }
             viewModel.screenState
                 .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
                 .buffer()
@@ -201,7 +210,6 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ShowFiles(filesList: List<FileData>) {
         Card(
@@ -245,7 +253,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxWidth(0.1f),
                         colors = CardDefaults.cardColors(
-                            containerColor = Beugelight,
+                            containerColor = Transparent,
                         ),
                         shape = RoundedCornerShape(5.dp),
                     ) {
@@ -256,41 +264,53 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    TransparentWidthCardOnClick({
+                    ColorWidthCardOnClick({
                         Text(
                             text = "Name",
+                            textAlign = TextAlign.Center,
                             fontSize = mainTextSize
                         )
                     }, 0.18f, {
                         changeSort(sortByTypes.ByName)
-                    })
+                    },
+                        Beugelight
+                    )
 
-                    TransparentWidthCardOnClick({
+                    ColorWidthCardOnClick({
                         Text(
                             text = "Size",
+                            textAlign = TextAlign.Center,
                             fontSize = mainTextSize
                         )
                     }, 0.17f, {
                         changeSort(sortByTypes.BySize)
-                    })
+                    },
+                        Beugelight
+                    )
 
-                    TransparentWidthCardOnClick({
+                    ColorWidthCardOnClick({
                         Text(
                             text = "Creation Date",
+                            textAlign = TextAlign.Center,
                             fontSize = mainTextSize
                         )
                     }, 0.4f, {
                         changeSort(sortByTypes.ByCreationDate)
-                    })
+                    },
+                        Beugelight
+                    )
 
-                    TransparentWidthCardOnClick({
+                    ColorWidthCardOnClick({
                         Text(
                             text = "Extension",
+                            textAlign = TextAlign.Center,
                             fontSize = mainTextSize
                         )
                     }, 1f, {
                         changeSort(sortByTypes.ByExtension)
-                    })
+                    },
+                        Beugelight
+                    )
                 }
             }
         }
@@ -319,7 +339,6 @@ class MainActivity : ComponentActivity() {
 
                 ) {
                     Box(
-//                            contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 10.dp, start = 16.dp),
@@ -439,8 +458,7 @@ class MainActivity : ComponentActivity() {
     fun changeSort(changeType: sortByTypes) {
         if (sortBy == changeType) {
             sortWay = !sortWay
-        }
-        else {
+        } else {
             sortBy = changeType
             sortWay = true
         }
@@ -467,17 +485,18 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun TransparentWidthCardOnClick(
+    fun ColorWidthCardOnClick(
         content: @Composable ColumnScope.() -> Unit,
         percentage: Float,
-        onClick: () -> Unit
+        onClick: () -> Unit,
+        color: Color
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth(percentage)
                 .fillMaxHeight(),
             colors = CardDefaults.cardColors(
-                containerColor = Transparent,
+                containerColor = color,
             ),
             content = content,
             onClick = onClick
@@ -485,6 +504,10 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+
+        lateinit var db: DBHelper
+        lateinit var dbManager: DBManager
+
         enum class sortByTypes {
             ByName,
             BySize,
