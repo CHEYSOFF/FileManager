@@ -9,25 +9,18 @@ import android.util.Log
 class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
-    // below is the method for creating a database by a sqlite query
     override fun onCreate(db: SQLiteDatabase) {
-        // below is a sqlite query, where column names
-        // along with their data types is given
         val query = ("CREATE TABLE " + TABLE_NAME + " ("
                 + FILE_PATH_COL + " TEXT PRIMARY KEY," +
                 HASH_COl + " TEXT," +
                 CHANGED_COl + " TEXT" + ")")
 
-        // we are calling sqlite
-        // method for executing our query
         db.execSQL(query)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
-        // this method is to check if table already exists
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME)
         onCreate(db)
-
     }
 
     fun updateHash(path: String, newHash: String): Boolean {

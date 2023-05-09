@@ -33,7 +33,7 @@ object FileManagerImpl : FileManager {
             val listFiles = dir.listFiles()
             if (listFiles == null || listFiles.size == 0) continue
             for (child in listFiles) {
-                // Note: if you want to get physical size and not just logical size, include directories too to the result, and not just normal files
+
                 if (child.isDirectory) {
                     dirs.add(child)
                 } else {
@@ -124,7 +124,6 @@ object FileManagerImpl : FileManager {
     override fun getFileTypeIcon(path: String): Int {
         val file = File(path)
         val ext = MimeTypeMap.getFileExtensionFromUrl(file.name)
-//        Log.i("ImagesExt", "$path ----> $ext")
         return when (".$ext") {
             ".folder" -> R.drawable.folder
             ".png", ".jpg", ".jpeg", ".gif", ".bmp" -> R.drawable.image
@@ -134,7 +133,6 @@ object FileManagerImpl : FileManager {
             ".txt", ".c", ".cpp", ".xml", ".py", ".json", ".log",
             ".xls", ".xlsx", ".doc", ".docx",
             ".ppt", ".pptx" -> R.drawable.file
-
             ".pdf" -> R.drawable.pdf
             ".jar", ".zip", ".rar", ".gz" -> R.drawable.zip
             ".apk" -> R.drawable.apk

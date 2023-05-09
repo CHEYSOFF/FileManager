@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ViewModel : ViewModel() {
-    //    private val fileManager = FileManagerImpl
     private val _screenState = MutableStateFlow<State>(State.Start)
     val screenState = _screenState.asStateFlow()
 
