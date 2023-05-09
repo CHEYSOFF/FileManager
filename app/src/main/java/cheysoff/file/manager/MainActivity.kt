@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                         is State.Start -> {
                             Log.d("Start", "Start")
 
-                            viewModel.GetFilesByPath(currentDirectory)
+                            viewModel.GetFilesByPath(currentDirectory, sortWay, sortBy)
                         }
 
                         is State.HasAllData -> {
@@ -256,40 +256,40 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    TransparentWidthCard({
+                    TransparentWidthCardOnClick({
                         Text(
                             text = "Name",
                             fontSize = mainTextSize
                         )
                     }, 0.18f, {
-                        //sort somehow
+                        changeSort(sortByTypes.ByName)
                     })
 
-                    TransparentWidthCard({
+                    TransparentWidthCardOnClick({
                         Text(
                             text = "Size",
                             fontSize = mainTextSize
                         )
                     }, 0.17f, {
-                        //sort somehow
+                        changeSort(sortByTypes.BySize)
                     })
 
-                    TransparentWidthCard({
+                    TransparentWidthCardOnClick({
                         Text(
                             text = "Creation Date",
                             fontSize = mainTextSize
                         )
                     }, 0.4f, {
-                        //sort somehow
+                        changeSort(sortByTypes.ByCreationDate)
                     })
 
-                    TransparentWidthCard({
+                    TransparentWidthCardOnClick({
                         Text(
                             text = "Extension",
                             fontSize = mainTextSize
                         )
                     }, 1f, {
-                        //sort somehow
+                        changeSort(sortByTypes.ByExtension)
                     })
                 }
             }
@@ -356,6 +356,10 @@ class MainActivity : ComponentActivity() {
                 onClick = {
                     if (file.isDirectory) {
                         currentDirectory += "/" + file.name
+
+                        sortBy = sortByTypes.ByName
+                        sortWay = true
+
                         viewModel.setToStart()
 
                         Log.d("currentDirectory", currentDirectory)
@@ -384,7 +388,7 @@ class MainActivity : ComponentActivity() {
                                     .size(40.dp),
                                 contentScale = ContentScale.Fit
                             )
-                        }, 0.1f, {})
+                        }, 0.1f)
 
                         TransparentWidthCard({
                             Column() {
@@ -399,7 +403,7 @@ class MainActivity : ComponentActivity() {
                                     color = Gray,
                                 )
                             }
-                        }, 0.35f, {})
+                        }, 0.35f)
 
                         TransparentWidthCard({
                             Text(
@@ -407,7 +411,7 @@ class MainActivity : ComponentActivity() {
                                 fontSize = subTextSize,
                                 color = Color.Black
                             )
-                        }, 0.5f, {})
+                        }, 0.5f)
 
                         TransparentWidthCard({
                             if (file.wasChanged) {
@@ -421,7 +425,7 @@ class MainActivity : ComponentActivity() {
                                     contentScale = ContentScale.Fit
                                 )
                             }
-                        }, 1f, {})
+                        }, 1f)
 
 
                     }
@@ -432,9 +436,38 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun changeSort(changeType: sortByTypes) {
+        if (sortBy == changeType) {
+            sortWay = !sortWay
+        }
+        else {
+            sortBy = changeType
+            sortWay = true
+        }
+        viewModel.setToStart()
+        Log.d("Sort", changeType.toString() + " " + sortWay.toString())
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TransparentWidthCard(
+        content: @Composable ColumnScope.() -> Unit,
+        percentage: Float
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(percentage)
+                .fillMaxHeight(),
+            colors = CardDefaults.cardColors(
+                containerColor = Transparent,
+            ),
+            content = content
+        )
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun TransparentWidthCardOnClick(
         content: @Composable ColumnScope.() -> Unit,
         percentage: Float,
         onClick: () -> Unit
@@ -452,6 +485,17 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        enum class sortByTypes {
+            ByName,
+            BySize,
+            ByCreationDate,
+            ByExtension
+        }
+
+
+        var sortBy = sortByTypes.ByName
+        var sortWay = true
+
         var currentDirectory = ""
         val environmentDirectory = getExternalStorageDirectory().absolutePath
 

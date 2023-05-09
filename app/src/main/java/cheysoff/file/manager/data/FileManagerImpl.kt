@@ -5,6 +5,7 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import cheysoff.file.manager.FileService.FileManager
 import cheysoff.file.manager.FileService.data.FileData
+import cheysoff.file.manager.MainActivity
 import cheysoff.file.manager.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,13 +43,17 @@ object FileManagerImpl : FileManager {
         return result
     }
 
-    override suspend fun GetFilesByPath(pathPart: String): List<FileData> {
+    override suspend fun GetFilesByPath(
+        pathPart: String,
+        sortWay: Boolean,
+        sortBy: MainActivity.Companion.sortByTypes
+    ): List<FileData> {
         val path = File(
             Environment.getExternalStorageDirectory().toString() + "/" + pathPart,
         )
         val files = path.listFiles { _, name -> true }
         val result = mutableListOf<FileData>()
-        if(files == null) {
+        if (files == null) {
             return result
         }
         for (file in files) {
@@ -72,7 +77,7 @@ object FileManagerImpl : FileManager {
             // Check if file is a directory
             val isDirectory = Files.isDirectory(filePath)
 
-            if(isDirectory) {
+            if (isDirectory) {
                 fileExtension = ".folder"
             }
 
@@ -87,6 +92,24 @@ object FileManagerImpl : FileManager {
                 fileName + " " + fileSize + " " + creationDate + " " + fileExtension + " " + isDirectory
             )
         }
+
+        if(sortWay) {
+            when (sortBy) {
+                MainActivity.Companion.sortByTypes.ByName -> result.sortBy { it.name }
+                MainActivity.Companion.sortByTypes.BySize -> result.sortBy { it.size }
+                MainActivity.Companion.sortByTypes.ByCreationDate -> result.sortBy { it.creationDate }
+                MainActivity.Companion.sortByTypes.ByExtension -> result.sortBy { it.extension }
+            }
+        }
+        else {
+            when (sortBy) {
+                MainActivity.Companion.sortByTypes.ByName -> result.sortByDescending { it.name }
+                MainActivity.Companion.sortByTypes.BySize -> result.sortByDescending  { it.size }
+                MainActivity.Companion.sortByTypes.ByCreationDate -> result.sortByDescending  { it.creationDate }
+                MainActivity.Companion.sortByTypes.ByExtension -> result.sortByDescending  { it.extension }
+            }
+        }
+
         return result
     }
 
@@ -103,6 +126,7 @@ object FileManagerImpl : FileManager {
             ".txt", ".c", ".cpp", ".xml", ".py", ".json", ".log",
             ".xls", ".xlsx", ".doc", ".docx",
             ".ppt", ".pptx" -> R.drawable.file
+
             ".pdf" -> R.drawable.pdf
             ".jar", ".zip", ".rar", ".gz" -> R.drawable.zip
             ".apk" -> R.drawable.apk

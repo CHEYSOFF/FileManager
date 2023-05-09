@@ -3,6 +3,7 @@ package cheysoff.file.manager.presention
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cheysoff.file.manager.MainActivity
 import cheysoff.file.manager.data.FileManagerImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,9 +21,13 @@ class ViewModel : ViewModel() {
         }
     }
 
-    fun GetFilesByPath(path : String) {
+    fun GetFilesByPath(
+        path: String,
+        sortWay: Boolean,
+        sortBy: MainActivity.Companion.sortByTypes
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val fileList = FileManagerImpl.GetFilesByPath(path)
+            val fileList = FileManagerImpl.GetFilesByPath(path, sortWay, sortBy)
             Log.d("filelist size", fileList.size.toString())
             _screenState.emit(State.HasAllData(fileList))
         }
