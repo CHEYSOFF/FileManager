@@ -13,9 +13,35 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
+import java.util.LinkedList
+import kotlin.random.Random
 
 
 object FileManagerImpl : FileManager {
+
+    fun getFileSize(file: File?): Long {
+        if (file == null || !file.exists()) return 0
+        if (!file.isDirectory) return file.length()
+        val dirs: MutableList<File> = LinkedList()
+        dirs.add(file)
+        var result: Long = 0
+        while (!dirs.isEmpty()) {
+            val dir = dirs.removeAt(0)
+            if (!dir.exists()) continue
+            val listFiles = dir.listFiles()
+            if (listFiles == null || listFiles.size == 0) continue
+            for (child in listFiles) {
+                // Note: if you want to get physical size and not just logical size, include directories too to the result, and not just normal files
+                if (child.isDirectory) {
+                    dirs.add(child)
+                } else {
+                    result += child.length()
+                }
+            }
+        }
+        return result
+    }
+
     override suspend fun GetFilesByPath(pathPart: String): List<FileData> {
         val path = File(
             Environment.getExternalStorageDirectory().toString() + "/" + pathPart,
@@ -32,7 +58,7 @@ object FileManagerImpl : FileManager {
             val fileName = filePath.fileName.toString()
 
             // Get file size in bytes
-            val fileSize = Files.size(filePath)
+            val fileSize = getFileSize(filePath.toFile())
 
             // Get file creation date
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -53,7 +79,7 @@ object FileManagerImpl : FileManager {
             val curFile = FileData(
                 name = fileName, isDirectory = isDirectory,
                 size = fileSize, creationDate = creationDate, extension = fileExtension,
-                wasChanged = false
+                wasChanged = Random.nextBoolean()
             )
             result.add(curFile)
             Log.d(
