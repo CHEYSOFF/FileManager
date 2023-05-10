@@ -5,10 +5,11 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import cheysoff.file.manager.FileService.FileManager
 import cheysoff.file.manager.FileService.data.FileData
-import cheysoff.file.manager.MainActivity
-import cheysoff.file.manager.MainActivity.Companion.db
 import cheysoff.file.manager.R
 import cheysoff.file.manager.db.DBHelper.Companion.CHANGED_COl
+import cheysoff.file.manager.presention.ViewModel
+import cheysoff.file.manager.presention.ViewModel.Companion.dbManager
+import cheysoff.file.manager.presention.ViewModel.Companion.SortByTypes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -44,38 +45,33 @@ object FileManagerImpl : FileManager {
         return result
     }
 
-    override suspend fun GetFilesByPath(
+    override suspend fun getFilesByPath(
         pathPart: String,
         sortWay: Boolean,
-        sortBy: MainActivity.Companion.sortByTypes
+        sortBy: SortByTypes
     ): List<FileData> {
         val path = File(
             Environment.getExternalStorageDirectory().toString() + "/" + pathPart,
         )
         val files = path.listFiles { _, name -> true }
-        val result = mutableListOf<FileData>()
+        val result = arrayListOf<FileData>()
         if (files == null) {
             return result
         }
         for (file in files) {
             val filePath: Path = Paths.get(file.absolutePath)
 
-            // Get file name
             val fileName = filePath.fileName.toString()
 
-            // Get file size in bytes
             val fileSize = getFileSize(filePath.toFile())
 
-            // Get file creation date
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
             val creationDate = dateFormat.format(withContext(Dispatchers.IO) {
                 Files.getLastModifiedTime(filePath)
             }.toMillis())
 
-            // Get file extension
             var fileExtension = filePath.fileName.toString().substringAfterLast(".")
 
-            // Check if file is a directory
             val isDirectory = Files.isDirectory(filePath)
 
             if (isDirectory) {
@@ -84,41 +80,26 @@ object FileManagerImpl : FileManager {
 
             Log.d("flpth", filePath.toString())
 
-
-            val res = db.getCell(filePath.toString(), CHANGED_COl)
+            val res = dbManager.getDbHelper().getCell(filePath.toString(), CHANGED_COl)
             Log.d("changed", res)
             val changed = (res != "same")
 
             val curFile = FileData(
-                name = fileName, isDirectory = isDirectory,
-                size = fileSize, creationDate = creationDate, extension = fileExtension,
+                name = fileName,
+                isDirectory = isDirectory,
+                size = fileSize,
+                creationDate = creationDate,
+                extension = fileExtension,
                 wasChanged = changed
             )
             result.add(curFile)
             Log.d(
                 "FileData",
-                fileName + " " + fileSize + " " + creationDate + " " + fileExtension + " " + isDirectory
+                "$fileName $fileSize $creationDate $fileExtension $isDirectory"
             )
         }
 
-        if(sortWay) {
-            when (sortBy) {
-                MainActivity.Companion.sortByTypes.ByName -> result.sortBy { it.name }
-                MainActivity.Companion.sortByTypes.BySize -> result.sortBy { it.size }
-                MainActivity.Companion.sortByTypes.ByCreationDate -> result.sortBy { it.creationDate }
-                MainActivity.Companion.sortByTypes.ByExtension -> result.sortBy { it.extension }
-            }
-        }
-        else {
-            when (sortBy) {
-                MainActivity.Companion.sortByTypes.ByName -> result.sortByDescending { it.name }
-                MainActivity.Companion.sortByTypes.BySize -> result.sortByDescending  { it.size }
-                MainActivity.Companion.sortByTypes.ByCreationDate -> result.sortByDescending  { it.creationDate }
-                MainActivity.Companion.sortByTypes.ByExtension -> result.sortByDescending  { it.extension }
-            }
-        }
-
-        return result
+        return result.customSort(ViewModel.sortWay, ViewModel.sortBy)
     }
 
     override fun getFileTypeIcon(path: String): Int {
@@ -133,6 +114,7 @@ object FileManagerImpl : FileManager {
             ".txt", ".c", ".cpp", ".xml", ".py", ".json", ".log",
             ".xls", ".xlsx", ".doc", ".docx",
             ".ppt", ".pptx" -> R.drawable.file
+
             ".pdf" -> R.drawable.pdf
             ".jar", ".zip", ".rar", ".gz" -> R.drawable.zip
             ".apk" -> R.drawable.apk

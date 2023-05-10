@@ -28,9 +28,9 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         Log.d("old", oldHash)
         Log.d("new", newHash)
         val changed = if (oldHash == newHash) {
-            "same"
+            SAME
         } else {
-            "changed"
+            CHANGED
         }
         Log.d("changes?", changed)
         updateOrInsertRow(path, newHash, changed)
@@ -55,12 +55,12 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
     }
 
-
     fun getCell(path: String, column: String): String {
         val db = readableDatabase
         val selection = "$FILE_PATH_COL = ?"
         val selectionArgs = arrayOf(path)
-        val cursor = db.query(TABLE_NAME, arrayOf(column), selection, selectionArgs, null, null, null)
+        val cursor =
+            db.query(TABLE_NAME, arrayOf(column), selection, selectionArgs, null, null, null)
         var result: String? = null
         Log.d("col", column)
         if (cursor.moveToFirst()) {
@@ -74,19 +74,15 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return result.orEmpty()
     }
 
-
     companion object {
-        private val DATABASE_NAME = "MD5_hash_codes"
+        private const val DATABASE_NAME = "MD5_hash_codes"
+        private const val DATABASE_VERSION = 1
+        const val TABLE_NAME = "files_hashes"
+        const val FILE_PATH_COL = "file_path"
+        const val HASH_COl = "hash"
+        const val CHANGED_COl = "changed"
 
-        private val DATABASE_VERSION = 1
-
-        val TABLE_NAME = "files_hashes"
-
-        val FILE_PATH_COL = "file_path"
-
-        val HASH_COl = "hash"
-
-        val CHANGED_COl = "changed"
-
+        const val CHANGED = "changed"
+        const val SAME = "same"
     }
 }

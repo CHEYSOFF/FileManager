@@ -1,4 +1,4 @@
-package cheysoff.file.manager.ui.theme
+package cheysoff.file.manager.ui
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -29,20 +29,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cheysoff.file.manager.FileService.data.FileData
-import cheysoff.file.manager.MainActivity
 import cheysoff.file.manager.R
 import cheysoff.file.manager.data.FileManagerImpl
 import cheysoff.file.manager.presention.ViewModel
+import cheysoff.file.manager.presention.ViewModel.Companion.currentDirectory
+import cheysoff.file.manager.presention.ViewModel.Companion.sortBy
+import cheysoff.file.manager.presention.ViewModel.Companion.sortWay
+import cheysoff.file.manager.ui.theme.Beuge
+import cheysoff.file.manager.ui.theme.Beugelight
+import cheysoff.file.manager.ui.theme.DarkBeuge
+import cheysoff.file.manager.ui.theme.Gray
 
 class Screen {
     @Composable
     fun ShowFiles(filesList: List<FileData>, viewModel: ViewModel) {
         Card(
-            modifier = Modifier.fillMaxSize(),
-            colors = CardDefaults.cardColors(
+            modifier = Modifier.fillMaxSize(), colors = CardDefaults.cardColors(
                 containerColor = DarkBeuge,
-            ),
-            shape = RoundedCornerShape(0.dp)
+            ), shape = RoundedCornerShape(0.dp)
         ) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -64,8 +68,7 @@ class Screen {
                 containerColor = Beuge,
             ),
             shape = RoundedCornerShape(0.dp),
-        )
-        {
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,42 +78,33 @@ class Screen {
 
                 Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth(0.1f),
+                        modifier = Modifier.fillMaxWidth(0.1f),
                         colors = CardDefaults.cardColors(
                             containerColor = Color.Transparent,
                         ),
                         shape = RoundedCornerShape(5.dp),
                     ) {
                         Text(
-                            text = "Sort by",
-                            textAlign = TextAlign.Center,
-                            fontSize = mainTextSize
+                            text = "Sort by", textAlign = TextAlign.Center, fontSize = mainTextSize
                         )
                     }
 
                     ColorWidthCardOnClick({
                         Text(
-                            text = "Name",
-                            textAlign = TextAlign.Center,
-                            fontSize = mainTextSize
+                            text = "Name", textAlign = TextAlign.Center, fontSize = mainTextSize
                         )
                     }, 0.18f, {
-                        changeSort(MainActivity.Companion.sortByTypes.ByName, viewModel)
-                    },
-                        Beugelight
+                        changeSort(ViewModel.Companion.SortByTypes.ByName, viewModel)
+                    }, Beugelight
                     )
 
                     ColorWidthCardOnClick({
                         Text(
-                            text = "Size",
-                            textAlign = TextAlign.Center,
-                            fontSize = mainTextSize
+                            text = "Size", textAlign = TextAlign.Center, fontSize = mainTextSize
                         )
                     }, 0.17f, {
-                        changeSort(MainActivity.Companion.sortByTypes.BySize, viewModel)
-                    },
-                        Beugelight
+                        changeSort(ViewModel.Companion.SortByTypes.BySize, viewModel)
+                    }, Beugelight
                     )
 
                     ColorWidthCardOnClick({
@@ -120,9 +114,8 @@ class Screen {
                             fontSize = mainTextSize
                         )
                     }, 0.4f, {
-                        changeSort(MainActivity.Companion.sortByTypes.ByCreationDate, viewModel)
-                    },
-                        Beugelight
+                        changeSort(ViewModel.Companion.SortByTypes.ByCreationDate, viewModel)
+                    }, Beugelight
                     )
 
                     ColorWidthCardOnClick({
@@ -132,9 +125,8 @@ class Screen {
                             fontSize = mainTextSize
                         )
                     }, 1f, {
-                        changeSort(MainActivity.Companion.sortByTypes.ByExtension, viewModel)
-                    },
-                        Beugelight
+                        changeSort(ViewModel.Companion.SortByTypes.ByExtension, viewModel)
+                    }, Beugelight
                     )
                 }
             }
@@ -144,23 +136,22 @@ class Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun DisplayFiles(filesList: List<FileData>, viewModel: ViewModel) {
-        if (MainActivity.currentDirectory != "") {
+        if (currentDirectory != "") {
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = Beuge,
                 ),
                 shape = RoundedCornerShape(15.dp),
                 onClick = {
-                    MainActivity.currentDirectory = MainActivity.currentDirectory.substringBeforeLast("/")
+                    currentDirectory = currentDirectory.substringBeforeLast("/")
                     viewModel.setToStart()
-                    Log.d("currentDirectory", MainActivity.currentDirectory)
+                    Log.d("currentDirectory", currentDirectory)
                 },
 
 
                 ) {
                 Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()
 
                 ) {
                     Box(
@@ -175,14 +166,11 @@ class Screen {
                                     id = (R.drawable.folder)
                                 ),
                                 contentDescription = "file type image",
-                                modifier = Modifier
-                                    .size(40.dp),
+                                modifier = Modifier.size(40.dp),
                                 contentScale = ContentScale.Fit
                             )
                             Text(
-                                text = "..",
-                                fontSize = 20.sp,
-                                color = Color.Black
+                                text = "..", fontSize = 20.sp, color = Color.Black
                             )
                         }
                     }
@@ -199,14 +187,14 @@ class Screen {
                 shape = RoundedCornerShape(15.dp),
                 onClick = {
                     if (file.isDirectory) {
-                        MainActivity.currentDirectory += "/" + file.name
+                        currentDirectory += "/" + file.name
 
-                        MainActivity.sortBy = MainActivity.Companion.sortByTypes.ByName
-                        MainActivity.sortWay = true
+                        sortBy = ViewModel.Companion.SortByTypes.ByName
+                        sortWay = true
 
                         viewModel.setToStart()
 
-                        Log.d("currentDirectory", MainActivity.currentDirectory)
+                        Log.d("currentDirectory", currentDirectory)
                     }
                 },
 
@@ -228,8 +216,7 @@ class Screen {
                                     )
                                 ),
                                 contentDescription = "file type image",
-                                modifier = Modifier
-                                    .size(40.dp),
+                                modifier = Modifier.size(40.dp),
                                 contentScale = ContentScale.Fit
                             )
                         }, 0.1f)
@@ -237,9 +224,7 @@ class Screen {
                         TransparentWidthCard({
                             Column() {
                                 Text(
-                                    text = file.name,
-                                    fontSize = mainTextSize,
-                                    color = Color.Black
+                                    text = file.name, fontSize = mainTextSize, color = Color.Black
                                 )
                                 Text(
                                     text = file.size.toString() + " bytes",
@@ -264,38 +249,34 @@ class Screen {
                                         id = R.drawable.changed
                                     ),
                                     contentDescription = "changed",
-                                    modifier = Modifier
-                                        .size(40.dp),
+                                    modifier = Modifier.size(40.dp),
                                     contentScale = ContentScale.Fit
                                 )
                             }
                         }, 1f)
 
-
                     }
-
 
                 }
             }
         }
     }
 
-    fun changeSort(changeType: MainActivity.Companion.sortByTypes, viewModel: ViewModel) {
-        if (MainActivity.sortBy == changeType) {
-            MainActivity.sortWay = !MainActivity.sortWay
+    fun changeSort(changeType: ViewModel.Companion.SortByTypes, viewModel: ViewModel) {
+        if (sortBy == changeType) {
+            sortWay = !sortWay
         } else {
-            MainActivity.sortBy = changeType
-            MainActivity.sortWay = true
+            sortBy = changeType
+            sortWay = true
         }
         viewModel.setToStart()
-        Log.d("Sort", changeType.toString() + " " + MainActivity.sortWay.toString())
+        Log.d("Sort", changeType.toString() + " " + sortWay.toString())
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TransparentWidthCard(
-        content: @Composable ColumnScope.() -> Unit,
-        percentage: Float
+        content: @Composable ColumnScope.() -> Unit, percentage: Float
     ) {
         Card(
             modifier = Modifier

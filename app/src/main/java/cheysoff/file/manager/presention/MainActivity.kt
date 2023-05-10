@@ -1,4 +1,4 @@
-package cheysoff.file.manager
+package cheysoff.file.manager.presention
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -22,11 +22,12 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
-import cheysoff.file.manager.db.DBHelper
 import cheysoff.file.manager.db.DBManager
-import cheysoff.file.manager.presention.State
-import cheysoff.file.manager.presention.ViewModel
-import cheysoff.file.manager.ui.theme.Screen
+import cheysoff.file.manager.presention.ViewModel.Companion.currentDirectory
+import cheysoff.file.manager.presention.ViewModel.Companion.dbManager
+import cheysoff.file.manager.presention.ViewModel.Companion.sortBy
+import cheysoff.file.manager.presention.ViewModel.Companion.sortWay
+import cheysoff.file.manager.ui.Screen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
@@ -45,13 +46,15 @@ class MainActivity : ComponentActivity() {
             requestPermission()
         }
 
-        db = DBHelper(this, null)
-        dbManager = DBManager()
+        val mainActivityContext = this
 
 
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                dbManager.updateDB(environmentDirectory)
+//                db = DBHelper(mainActivityContext, null)
+                dbManager = DBManager()
+                dbManager.init(mainActivityContext, null)
+                dbManager.updateDB(getExternalStorageDirectory().absolutePath)
             }
             viewModel.screenState
                 .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
@@ -61,7 +64,7 @@ class MainActivity : ComponentActivity() {
                         is State.Start -> {
                             Log.d("Start", "Start")
 
-                            viewModel.GetFilesByPath(currentDirectory, sortWay, sortBy)
+                            viewModel.getFilesByPath(currentDirectory, sortWay, sortBy)
                         }
 
                         is State.HasAllData -> {
@@ -77,7 +80,6 @@ class MainActivity : ComponentActivity() {
                 }
         }
     }
-
 
     private fun requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -123,7 +125,7 @@ class MainActivity : ComponentActivity() {
                         TAG,
                         "storageActivityResultLauncher: Manage External Storage Permission is denied...."
                     )
-                    toast("Manage External Storage Permission is denied....")
+                    showToast("Manage External Storage Permission is denied....")
                 }
             } else {
                 //Android is below 11(R)
@@ -160,36 +162,17 @@ class MainActivity : ComponentActivity() {
                 } else {
                     //External Storage Permission denied...
                     Log.d(TAG, "onRequestPermissionsResult: External Storage Permission denied...")
-                    toast("External Storage Permission denied...")
+                    showToast("External Storage Permission denied...")
                 }
             }
         }
     }
 
-
-    private fun toast(message: String) {
+    private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     companion object {
-
-        lateinit var db: DBHelper
-        lateinit var dbManager: DBManager
-
-        enum class sortByTypes {
-            ByName,
-            BySize,
-            ByCreationDate,
-            ByExtension
-        }
-
-
-        var sortBy = sortByTypes.ByName
-        var sortWay = true
-
-        var currentDirectory = ""
-        val environmentDirectory = getExternalStorageDirectory().absolutePath
-
         private val STORAGE_PERMISSION_CODE = 100
     }
 

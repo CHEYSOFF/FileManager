@@ -3,8 +3,8 @@ package cheysoff.file.manager.presention
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cheysoff.file.manager.MainActivity
 import cheysoff.file.manager.data.FileManagerImpl
+import cheysoff.file.manager.db.DBManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,15 +20,33 @@ class ViewModel : ViewModel() {
         }
     }
 
-    fun GetFilesByPath(
+    fun getFilesByPath(
         path: String,
         sortWay: Boolean,
-        sortBy: MainActivity.Companion.sortByTypes
+        sortBy: SortByTypes
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val fileList = FileManagerImpl.GetFilesByPath(path, sortWay, sortBy)
+            val fileList = FileManagerImpl.getFilesByPath(path, sortWay, sortBy)
             Log.d("filelist size", fileList.size.toString())
             _screenState.emit(State.HasAllData(fileList))
         }
+    }
+
+    companion object {
+
+        lateinit var dbManager: DBManager
+
+        enum class SortByTypes {
+            ByName,
+            BySize,
+            ByCreationDate,
+            ByExtension
+        }
+
+
+        var sortBy = SortByTypes.ByName
+        var sortWay = true
+
+        var currentDirectory = ""
     }
 }
