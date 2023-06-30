@@ -102,11 +102,10 @@ object FileManagerImpl : FileManager {
         return result.customSort(ViewModel.sortWay, ViewModel.sortBy)
     }
 
-    override fun getFileTypeIcon(path: String): Int {
-        val file = File(path)
-        val ext = MimeTypeMap.getFileExtensionFromUrl(file.name)
+    override fun getFileTypeIcon(ext: String): Int {
+        Log.d("ext", ext)
         return when (".$ext") {
-            ".folder" -> R.drawable.folder
+            "..folder" -> R.drawable.folder
             ".png", ".jpg", ".jpeg", ".gif", ".bmp" -> R.drawable.image
             ".mp3", ".wav", ".ogg", "midi" -> R.drawable.audio
             ".mp4", ".rmvb", ".avi", ".flv", ".3gp" -> R.drawable.video
